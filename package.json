@@ -1,6 +1,6 @@
 {
   "name": "nullstack-bottomsheet",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist",
   "module": "dist",
   "types": "dist/index.d.ts",

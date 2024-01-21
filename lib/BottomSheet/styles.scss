@@ -1,3 +1,10 @@
+body.bottom-sheet-body-lock {
+  position: fixed;
+  overflow-y: scroll;
+  width: 100vw;
+  width: 100dvw;
+}
+
 .bottom-sheet {
   position: fixed;
   inset: 0;

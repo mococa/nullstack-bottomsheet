@@ -9,10 +9,11 @@ const closest = (arr: number[], value: number) =>
 export interface BottomSheetProps {
   snaps: number[];
   default_snap: number;
-  showing?: boolean;
   onclose: () => void;
   snapping_time?: number;
   close_on_snap_to_zero?: boolean;
+  lock_scroll?: boolean;
+  onsnap?: (snap: number) => void;
 }
 
 export class BottomSheet extends Nullstack<BottomSheetProps> {
@@ -57,12 +58,14 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     snaps,
     snapping_time = 200,
     close_on_snap_to_zero,
+    onsnap,
   }: Partial<NullstackClientContext<BottomSheetProps>>) {
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
 
     this.draggable_area.style.cursor = document.body.style.cursor = "";
 
     const closest_value = closest(snaps, this.sheet_height);
+    if (onsnap) onsnap(closest_value);
 
     this.sheet_shown = Boolean(closest_value);
     this.sheet_height = closest_value;
@@ -96,11 +99,17 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     this.overlay.classList.remove("showing");
 
     setTimeout(onclose, snapping_time);
+
+    // Unlocking scroll
+    document.body.style.removeProperty("margin-top");
+    if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
+    document.body.classList.remove("bottom-sheet-body-lock");
   }
 
   hydrate({
     default_snap,
     snapping_time = 200,
+    lock_scroll = true,
   }: NullstackClientContext<BottomSheetProps>) {
     this.overlay.classList.add("showing");
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
@@ -112,6 +121,13 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     setTimeout(() => {
       this.sheet_content.style.removeProperty("transition");
     }, snapping_time);
+
+    // Locking scroll
+    if (document.body.scrollHeight < window.innerHeight) return;
+    if (!lock_scroll) return;
+    if (document.body.classList.contains("bottom-sheet-body-lock")) return;
+    document.body.style.marginTop = `-${window.scrollY}px`;
+    document.body.classList.add("bottom-sheet-body-lock");
   }
 
   terminate() {
@@ -120,9 +136,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     );
   }
 
-  render({ children, showing }: NullstackClientContext<BottomSheetProps>) {
-    if (!showing && showing !== undefined) return null;
-
+  render({ children }: NullstackClientContext<BottomSheetProps>) {
     return (
       <div class="bottom-sheet" onpointermove={this.dragmove}>
         <div class="overlay" ref={this.overlay} onclick={this.onclose} />
