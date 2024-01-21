@@ -105,9 +105,9 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     if (!lock_scroll) return;
     const scrollTop = -parseInt(document.body.style.marginTop, 10);
     document.body.style.removeProperty("margin-top");
-    window.scrollTo(window.scrollY, scrollTop);
     if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
     document.body.classList.remove("bottom-sheet-body-lock");
+    window.scrollTo(window.scrollY, scrollTop);
   }
 
   hydrate({
