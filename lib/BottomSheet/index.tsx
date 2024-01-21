@@ -93,6 +93,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
   onclose({
     snapping_time = 200,
     onclose,
+    lock_scroll,
   }: Partial<NullstackClientContext<BottomSheetProps>>) {
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `0dvh`;
@@ -101,7 +102,10 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     setTimeout(onclose, snapping_time);
 
     // Unlocking scroll
+    if (!lock_scroll) return;
+    const scrollTop = -parseInt(document.body.style.marginTop, 10);
     document.body.style.removeProperty("margin-top");
+    window.scrollTo(window.scrollY, scrollTop);
     if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
     document.body.classList.remove("bottom-sheet-body-lock");
   }
