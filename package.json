@@ -1,6 +1,6 @@
 {
   "name": "nullstack-bottomsheet",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist",
   "module": "dist",
   "types": "dist/index.d.ts",
@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "@types/node": "^14.18.1",
+    "nullstack": ">=0.16.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.6",
-    "nullstack": "~0.18.0"
+    "typescript": "^5.1.6"
   },
   "keywords": [
     "bottomsheet",

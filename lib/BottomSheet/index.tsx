@@ -102,7 +102,6 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     default_snap,
     snapping_time = 200,
   }: NullstackClientContext<BottomSheetProps>) {
-    console.log("hydrating!!!", this.drag_position);
     this.overlay.classList.add("showing");
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `${default_snap}dvh`;
