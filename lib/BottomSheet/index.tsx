@@ -9,6 +9,7 @@ const closest = (arr: number[], value: number) =>
 export interface BottomSheetProps {
   snaps: number[];
   default_snap: number;
+  showing?: boolean;
   onclose: () => void;
   snapping_time?: number;
   close_on_snap_to_zero?: boolean;
@@ -72,7 +73,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     }
 
     if (
-      !this.sheet_shown &&
+      !closest_value &&
       close_on_snap_to_zero &&
       this.drag_position !== undefined
     ) {
@@ -120,7 +121,9 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     );
   }
 
-  render({ children }: NullstackClientContext) {
+  render({ children, showing }: NullstackClientContext<BottomSheetProps>) {
+    if (!showing && showing !== undefined) return null;
+
     return (
       <div class="bottom-sheet" onpointermove={this.dragmove}>
         <div class="overlay" ref={this.overlay} onclick={this.onclose} />
