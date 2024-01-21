@@ -93,7 +93,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
   onclose({
     snapping_time = 200,
     onclose,
-    lock_scroll,
+    lock_scroll = true,
   }: Partial<NullstackClientContext<BottomSheetProps>>) {
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `0dvh`;
