@@ -6,10 +6,15 @@ const closest = (arr: number[], value: number) =>
     Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
   );
 
+interface EventWithArguments extends Event {
+  args: IArguments;
+}
+
 export interface BottomSheetProps {
   snaps: number[];
   default_snap: number;
   onclose: () => void;
+  id?: string;
   snapping_time?: number;
   close_on_snap_to_zero?: boolean;
   lock_scroll?: boolean;
@@ -26,6 +31,14 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
 
   _touch_position(event: any) {
     return event.touches ? event.touches[0] : event;
+  }
+
+  _replace(url: string) {
+    window.history.replaceState(undefined, undefined, url);
+  }
+
+  _push(url: string) {
+    window.history.pushState(undefined, undefined, url);
   }
 
   dragstart({ event }) {
@@ -94,6 +107,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     snapping_time = 200,
     onclose,
     lock_scroll = true,
+    router,
   }: Partial<NullstackClientContext<BottomSheetProps>>) {
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `0dvh`;
@@ -108,19 +122,26 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
     document.body.classList.remove("bottom-sheet-body-lock");
     window.scrollTo(window.scrollY, scrollTop);
+
+    this._replace(router.url);
   }
 
   hydrate({
     default_snap,
     snapping_time = 200,
     lock_scroll = true,
+    router,
+    id,
   }: NullstackClientContext<BottomSheetProps>) {
     this.overlay.classList.add("showing");
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `${default_snap}dvh`;
     this.sheet_height = default_snap;
 
+    if (id) this._push(`${router.url}#bottom-sheet:${id}`);
+
     window.addEventListener("pointermove", (event) => this.dragmove({ event }));
+    window.addEventListener("hashchange", () => this.onclose({}));
 
     setTimeout(() => {
       this.sheet_content.style.removeProperty("transition");
@@ -130,6 +151,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     if (document.body.scrollHeight < window.innerHeight) return;
     if (!lock_scroll) return;
     if (document.body.classList.contains("bottom-sheet-body-lock")) return;
+
     document.body.style.marginTop = `-${window.scrollY}px`;
     document.body.classList.add("bottom-sheet-body-lock");
   }
@@ -138,6 +160,8 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     window.removeEventListener("pointermove", (event) =>
       this.dragmove({ event })
     );
+
+    window.removeEventListener("hashchange", () => this.onclose({}));
   }
 
   render({ children }: NullstackClientContext<BottomSheetProps>) {
