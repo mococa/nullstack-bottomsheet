@@ -142,6 +142,9 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
 
     window.addEventListener("pointermove", (event) => this.dragmove({ event }));
     window.addEventListener("hashchange", () => this.onclose({}));
+    window.addEventListener("keyup", ({ key }) => {
+      if (key === "Escape") this.onclose({});
+    });
 
     setTimeout(() => {
       this.sheet_content.style.removeProperty("transition");
@@ -162,6 +165,10 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     );
 
     window.removeEventListener("hashchange", () => this.onclose({}));
+
+    window.removeEventListener("keyup", ({ key }) => {
+      if (key === "Escape") this.onclose({});
+    });
   }
 
   render({ children }: NullstackClientContext<BottomSheetProps>) {
