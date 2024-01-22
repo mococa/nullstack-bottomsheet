@@ -105,7 +105,29 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     }, snapping_time);
   }
 
-  close({
+  private lockScroll({
+    lock_scroll = true,
+  }: Partial<NullstackClientContext<BottomSheetProps>>) {
+    if (document.body.scrollHeight < window.innerHeight) return;
+    if (!lock_scroll) return;
+    if (document.body.classList.contains("bottom-sheet-body-lock")) return;
+
+    document.body.style.marginTop = `-${window.scrollY}px`;
+    document.body.classList.add("bottom-sheet-body-lock");
+  }
+
+  private unlockScroll({
+    lock_scroll = true,
+  }: Partial<NullstackClientContext<BottomSheetProps>>) {
+    if (!lock_scroll) return;
+    const scrollTop = -parseInt(document.body.style.marginTop, 10);
+    document.body.style.removeProperty("margin-top");
+    if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
+    document.body.classList.remove("bottom-sheet-body-lock");
+    window.scrollTo(window.scrollY, scrollTop);
+  }
+
+  async close({
     snapping_time = 200,
     onclose,
     lock_scroll = true,
@@ -115,17 +137,15 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     this.sheet_content.style.maxHeight = `0dvh`;
     this.overlay.classList.remove("showing");
 
-    setTimeout(onclose, snapping_time);
-
-    // Unlocking scroll
-    if (!lock_scroll) return;
-    const scrollTop = -parseInt(document.body.style.marginTop, 10);
-    document.body.style.removeProperty("margin-top");
-    if (!document.body.classList.contains("bottom-sheet-body-lock")) return;
-    document.body.classList.remove("bottom-sheet-body-lock");
-    window.scrollTo(window.scrollY, scrollTop);
+    this.unlockScroll({ lock_scroll });
 
     this._replace(router.url);
+
+    await new Promise((res) => {
+      setTimeout(res, snapping_time);
+    });
+
+    onclose();
   }
 
   hydrate({
@@ -158,13 +178,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
       this.sheet_content.style.removeProperty("transition");
     }, snapping_time);
 
-    // Locking scroll
-    if (document.body.scrollHeight < window.innerHeight) return;
-    if (!lock_scroll) return;
-    if (document.body.classList.contains("bottom-sheet-body-lock")) return;
-
-    document.body.style.marginTop = `-${window.scrollY}px`;
-    document.body.classList.add("bottom-sheet-body-lock");
+    this.lockScroll({ lock_scroll });
   }
 
   terminate() {
