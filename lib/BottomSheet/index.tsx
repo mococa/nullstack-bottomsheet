@@ -6,11 +6,13 @@ const closest = (arr: number[], value: number) =>
     Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
   );
 
-interface EventWithArguments extends Event {
-  args: IArguments;
+interface NullstackRef {
+  property?: string | number;
+  object?: any;
 }
 
 export interface BottomSheetProps {
+  ref?: BottomSheet;
   snaps: number[];
   default_snap: number;
   onclose: () => void;
@@ -23,31 +25,31 @@ export interface BottomSheetProps {
 
 export class BottomSheet extends Nullstack<BottomSheetProps> {
   drag_position?: number;
-  sheet_content: HTMLDivElement;
-  draggable_area: HTMLDivElement;
-  overlay: HTMLDivElement;
   sheet_height: number;
   sheet_shown: boolean;
+  private sheet_content: HTMLDivElement;
+  private draggable_area: HTMLDivElement;
+  private overlay: HTMLDivElement;
 
-  _touch_position(event: any) {
+  private _touch_position(event: any) {
     return event.touches ? event.touches[0] : event;
   }
 
-  _replace(url: string) {
+  private _replace(url: string) {
     window.history.replaceState(undefined, undefined, url);
   }
 
-  _push(url: string) {
+  private _push(url: string) {
     window.history.pushState(undefined, undefined, url);
   }
 
-  dragstart({ event }) {
+  private dragstart({ event }) {
     this.drag_position = this._touch_position(event).pageY;
     this.draggable_area.style.cursor = document.body.style.cursor = "grabbing";
     this.sheet_content.classList.remove("fullscreen");
   }
 
-  dragmove({ event }) {
+  private dragmove({ event }) {
     if (this.sheet_height !== 100)
       this.sheet_content.classList.remove("fullscreen");
 
@@ -67,7 +69,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
       this.sheet_content.classList.add("fullscreen");
   }
 
-  dragend({
+  private dragend({
     snaps,
     snapping_time = 200,
     close_on_snap_to_zero,
@@ -93,7 +95,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
       close_on_snap_to_zero &&
       this.drag_position !== undefined
     ) {
-      this.onclose({});
+      this.close({});
     }
 
     this.drag_position = undefined;
@@ -103,7 +105,7 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     }, snapping_time);
   }
 
-  onclose({
+  close({
     snapping_time = 200,
     onclose,
     lock_scroll = true,
@@ -132,7 +134,13 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     lock_scroll = true,
     router,
     id,
+    ref,
   }: NullstackClientContext<BottomSheetProps>) {
+    if (ref) {
+      const { object, property } = ref as NullstackRef;
+      object[property] = this;
+    }
+
     this.overlay.classList.add("showing");
     this.sheet_content.style.transition = `height 0.5s, max-height ${snapping_time}ms ease`;
     this.sheet_content.style.maxHeight = `${default_snap}dvh`;
@@ -141,9 +149,9 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     if (id) this._push(`${router.url}#bottom-sheet:${id}`);
 
     window.addEventListener("pointermove", (event) => this.dragmove({ event }));
-    window.addEventListener("hashchange", () => this.onclose({}));
+    window.addEventListener("hashchange", () => this.close({}));
     window.addEventListener("keyup", ({ key }) => {
-      if (key === "Escape") this.onclose({});
+      if (key === "Escape") this.close({});
     });
 
     setTimeout(() => {
@@ -164,17 +172,17 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
       this.dragmove({ event })
     );
 
-    window.removeEventListener("hashchange", () => this.onclose({}));
+    window.removeEventListener("hashchange", () => this.close({}));
 
     window.removeEventListener("keyup", ({ key }) => {
-      if (key === "Escape") this.onclose({});
+      if (key === "Escape") this.close({});
     });
   }
 
   render({ children }: NullstackClientContext<BottomSheetProps>) {
     return (
       <div class="bottom-sheet" onpointermove={this.dragmove}>
-        <div class="overlay" ref={this.overlay} onclick={this.onclose} />
+        <div class="overlay" ref={this.overlay} onclick={this.close} />
 
         <div class="bottom-sheet-content" ref={this.sheet_content}>
           <header
