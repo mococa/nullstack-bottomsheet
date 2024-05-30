@@ -89,6 +89,8 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
 
     if (closest_value === 100) {
       this.sheet_content.classList.add("fullscreen");
+    } else {
+      this.sheet_content.classList.remove("fullscreen");
     }
 
     if (
