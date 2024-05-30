@@ -21,6 +21,7 @@ export interface BottomSheetProps {
   close_on_snap_to_zero?: boolean;
   lock_scroll?: boolean;
   onsnap?: (snap: number) => void;
+  class?: string | string[];
 }
 
 export class BottomSheet extends Nullstack<BottomSheetProps> {
@@ -193,9 +194,12 @@ export class BottomSheet extends Nullstack<BottomSheetProps> {
     });
   }
 
-  render({ children }: NullstackClientContext<BottomSheetProps>) {
+  render({ children, class: klass }: NullstackClientContext<BottomSheetProps>) {
     return (
-      <div class="bottom-sheet" onpointermove={this.dragmove}>
+      <div
+        class={["bottom-sheet", klass].flat().filter(Boolean).join(" ")}
+        onpointermove={this.dragmove}
+      >
         <div class="overlay" ref={this.overlay} onclick={this.close} />
 
         <div class="bottom-sheet-content" ref={this.sheet_content}>
